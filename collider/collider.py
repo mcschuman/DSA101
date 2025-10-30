@@ -48,8 +48,8 @@ class Sphere:
 
     def move(self):
         self.vy += self.gravity  # Apply gravity to vertical velocity
-        # self.x (compute self.x based on self.vx)
-        # self.y (compute self.y based on self.vy)
+        self.x += self.vx
+        self.y += self.vy
 
     def check_wall_collision(self, width, height):
         if self.x - self.radius < 0 or self.x + self.radius > width:
@@ -60,32 +60,32 @@ class Sphere:
     def check_sphere_collision(self, other):
         dx = self.x - other.x
         dy = self.y - other.y
-        # distance = (complete)
+        distance = np.sqrt(dx**2 + dy**2)
         if distance < self.radius + other.radius:
             # Calculate new velocities based on conservation of momentum and kinetic energy
-            # nx = dx / distance
-            # ny = dy / distance
-            # p = (complete)
-            # self.vx -= (complete)
-            # self.vy -= (complete)
-            # other.vx += (complete)
-            # other.vy += (complete)
+            nx = dx / distance
+            ny = dy / distance
+            p = 2 * (self.vx * nx + self.vy * ny - other.vx * nx - other.vy * ny) / (self.mass + other.mass)
+            self.vx -= p * other.mass * nx
+            self.vy -= p * other.mass * ny
+            other.vx += p * self.mass * nx
+            other.vy += p * self.mass * ny
 
             # Separate the spheres to prevent overlap
-            # overlap = (complete)
-            # self.x (compute based on overlap)
-            # self.y (compute based on overlap)
-            # other.x (compute based on overlap)
-            # other.y (compute based on overlap)
+            overlap = 0.5 * (self.radius + other.radius - distance + 1)
+            self.x += overlap * nx
+            self.y += overlap * ny
+            other.x -= overlap * nx
+            other.y -= overlap * ny
 
     def equilibriate_temperature(self, temperature):
         # on average kb*T energy per degree of freedom
         kb = 1
-        # v_equilibrium = (complete)
+        v_equilibrium = np.sqrt(2 * kb * temperature / self.mass)
         alpha = 0.01
         direction = np.arctan2(self.vy, self.vx)
-        # self.vx =  (complete)
-        # self.vy =  (complete)
+        self.vx = alpha * v_equilibrium * np.cos(direction) + self.vx * (1 - alpha)
+        self.vy = alpha * v_equilibrium * np.sin(direction) + self.vy * (1 - alpha)
 
 
 class ChemicalSphere(Sphere):
@@ -111,18 +111,18 @@ class ChemicalSphere(Sphere):
         #     return
 
         # calculate total kinetic energy
-        # self_kinetic_energy = (complete)
-        # other_kinetic_energy = (complete)
-        # total_kinetic_energy = (complete)
+        self_kinetic_energy = 0.5 * self.mass * (self.vx**2 + self.vy**2)
+        other_kinetic_energy = 0.5 * other.mass * (other.vx**2 + other.vy**2)
+        total_kinetic_energy = self_kinetic_energy + other_kinetic_energy
 
         if total_kinetic_energy < self.atom.activation_energy:
             super().check_sphere_collision(other)
             return
 
         # determine if the spheres collide and react
-        # dx = (complete)
-        # dy = (complete)
-        # distance = (complete)
+        dx = self.x - other.x
+        dy = self.y - other.y
+        distance = np.sqrt(dx**2 + dy**2)
         if distance < self.radius + other.radius:
 
             self.atom = nitric_oxide
@@ -206,9 +206,9 @@ class Simulation:
 
     def update(self):
         for sphere in self.spheres:
-            # call appropriate sphere.function()
+            sphere.move()
             for wall in self.walls:
-                # call appropriate wall.function()
+                wall.check_collision(sphere)
             for other in self.spheres:
                 if sphere != other:
                     sphere.check_sphere_collision(other)
