@@ -15,9 +15,8 @@ The purpose of this exercise is to practice a collaborative workflow using git. 
 
 The simulation is a toy model of atoms from two different elements reacting in the gas phase. It is loosely motivated by the reaction of nitrogen and oxygen to nitrous oxide. It can be improved.
 
-The repository contains the following files:
-- README.md: this file
-- collider.py: a Python file that simulates particle collisions
+The repository folder collider contains the following files:
+- collider.py: a Python file that simulates particle collisions. This needs to be completed for the simulation to run.
 - Simulation_interface.ipynb: a Python notebook to run the simulation
 - requirements.txt: a requirement file
 - test_collider.py: test suite using pytest
