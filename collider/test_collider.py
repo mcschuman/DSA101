@@ -55,7 +55,7 @@ def test_simulation():
     assert len(sim.spheres) == num_spheres
 
     # Check the number of walls created
-    assert len(sim.walls) == 4
+    assert len(sim.walls) == 8
 
     # run simulation steps    
     for _ in range(1000):
